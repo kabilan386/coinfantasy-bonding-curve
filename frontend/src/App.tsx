@@ -56,21 +56,21 @@ function App() {
   })
 
   const estBuyQ = useReadContract({
-  address: BondingCurveToken,
-  abi: BondingCurveABI,
-  functionName: 'estimateTokensForEth',
-  args: [buyEth && Number(buyEth) > 0 ? parseEther(buyEth) : 0n],
-  query: { enabled: Number(buyEth) > 0 }
-})
+    address: BondingCurveToken,
+    abi: BondingCurveABI,
+    functionName: 'estimateTokensForEth',
+    args: [buyEth && Number(buyEth) > 0 ? parseEther(buyEth) : 0n],
+    query: { enabled: Number(buyEth) > 0 }
+  })
 
-// sell estimate
-const estSellQ = useReadContract({
-  address: BondingCurveToken,
-  abi: BondingCurveABI,
-  functionName: 'estimateEthForTokens',
-  args: [sellTok && Number(sellTok) > 0 ? parseEther(sellTok) : 0n],
-  query: { enabled: Number(sellTok) > 0 }
-})
+  // sell estimate
+  const estSellQ = useReadContract({
+    address: BondingCurveToken,
+    abi: BondingCurveABI,
+    functionName: 'estimateEthForTokens',
+    args: [sellTok && Number(sellTok) > 0 ? parseEther(sellTok) : 0n],
+    query: { enabled: Number(sellTok) > 0 }
+  })
 
   // ---- Writes ----
   const {
@@ -154,10 +154,10 @@ const estSellQ = useReadContract({
 
   return (
     <>
-      <appkit-button />
-      <div style={{ maxWidth: 720, margin: '24px auto', fontFamily: 'ui-sans-serif' }}>
+
+      {/* <div style={{ maxWidth: 720, margin: '24px auto', fontFamily: 'ui-sans-serif' }}>
         <h2>Bonding Curve Token</h2>
-        <div style={{ fontSize: 12}}>
+        <div style={{ fontSize: 12 }}>
           ChainId: {chainId ?? '—'} &nbsp;|&nbsp; Connected: {isConnected ? 'yes' : 'no'}
         </div>
 
@@ -211,9 +211,178 @@ const estSellQ = useReadContract({
         <div style={{ marginTop: 16, fontSize: 12, color: '#666' }}>
           Note: selling requires the contract to hold enough ETH; buy first or pre-fund the contract.
         </div>
+      </div> */}
+
+
+      <div className="min-h-screen bg-[#0b0d10] text-zinc-200 px-4 py-10 w-full">
+        <div className="mx-auto max-w-6xl">
+          <div className='flex items-center justify-between mb-8'>
+            <h1 className="mb-8 text-center text-2xl font-semibold tracking-tight">
+              CURVE Bonding — Buy & Sell
+            </h1>
+            <appkit-button />
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Buy Card */}
+            <section className="relative rounded-xl border border-emerald-800/40 bg-emerald-950/30 p-6 shadow-[0_0_0_1px_rgba(16,185,129,0.15)]">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="text-emerald-400"
+                    >
+                      <path d="M4 14l5-5 4 4 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <h2 className="text-xl font-semibold">Buy CURVE</h2>
+                </div>
+
+                <span className="rounded-full border border-emerald-700/40 bg-emerald-900/30 px-3 py-1 text-xs text-emerald-300">
+                  Bonding Curve
+                </span>
+              </div>
+
+              <label className="mb-2 block text-sm text-zinc-400">Pay with ETH</label>
+              <div className="mb-5 flex items-center justify-between text-xs text-zinc-400">
+                <span></span>
+                <span>Current Price: {priceQ.data ? `${Number(formatEther(priceQ.data as bigint)).toFixed(6)} ETH / token` : '…'}</span>
+              </div>
+
+              <input
+                type="text"
+                value={buyEth}
+                onChange={(e) => setBuyEth(e.target.value)}
+                placeholder="0.00"
+                className="mb-4 w-full rounded-lg border border-emerald-800/40 bg-[#111415] px-4 py-3 text-zinc-100 placeholder-zinc-500 outline-none ring-emerald-700/30 focus:border-emerald-500 focus:ring-2"
+              />
+              {/* Estimated Value */}
+              <p className="mb-4 text-xs text-zinc-400">
+                Estimated Value: <span className="text-emerald-300">{buyEst ? formatEther(buyEst) : '0'} {symbolQ.data as string ?? ''}</span>
+              </p>
+              <button
+                className="w-full rounded-lg bg-emerald-700 py-3 font-medium text-white shadow hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleBuy} disabled={!isConnected || Number(buyEth) <= 0}
+              >
+                {!writePending ? "Buy CURVE" : "Loading..."}
+              </button>
+            </section>
+
+            {/* Sell Card */}
+            <section className="relative rounded-xl border border-red-900/40 bg-red-950/30 p-6 shadow-[0_0_0_1px_rgba(239,68,68,0.12)]">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/15">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="text-red-400"
+                    >
+                      <path d="M20 10l-5 5-4-4-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <h2 className="text-xl font-semibold">Sell CURVE</h2>
+                </div>
+
+                <span className="rounded-full border border-red-900/40 bg-red-900/30 px-3 py-1 text-xs text-red-300">
+                  Bonding Curve
+                </span>
+              </div>
+
+              <label className="mb-2 block text-sm text-zinc-400">Pay with SCT Tokens</label>
+              <div className="mb-5 flex items-center justify-between text-xs text-zinc-400">
+                <span></span>
+                <span>Current Price: {priceQ.data ? `${Number(formatEther(priceQ.data as bigint)).toFixed(6)} ETH / token` : '…'}</span>
+              </div>
+
+              <input
+                type="text"
+                placeholder="0.00"
+                className="mb-4 w-full rounded-lg border border-red-900/40 bg-[#111415] px-4 py-3 text-zinc-100 placeholder-zinc-500 outline-none ring-red-800/30 focus:border-red-500 focus:ring-2"
+                value={sellTok}
+                onChange={(e) => setSellTok(e.target.value)}
+              />
+              {/* Estimated Value */}
+              <p className="mb-4 text-xs text-zinc-400">
+                Estimated Value: <span className="text-red-300">{sellEst ? formatEther(sellEst) : '0'} ETH</span>
+              </p>
+
+              <button
+                className="w-full rounded-lg bg-red-700 py-3 font-medium text-white shadow hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleSell} disabled={!isConnected || Number(sellTok) <= 0}
+              >
+                Sell CURVE
+              </button>
+            </section>
+          </div>
+          {/* Token Information */}
+          <div className="rounded-xl border border-zinc-700 bg-[#111415] p-6 text-sm mt-4">
+            <h2 className="mb-4 text-lg font-semibold text-white">Token Information</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span className="text-zinc-400">Token Name:</span>{" "}
+                <span className="font-medium text-white">Curve Token</span>
+              </div>
+
+
+              <div>
+                <span className="text-zinc-400">Symbol:</span>{" "}
+                <span className="font-medium text-white">{symbolQ.data as string ?? "..."}</span>
+              </div>
+              <div>
+                <span className="text-zinc-400">Total Supply:</span>{" "}
+                <span className="font-medium text-white">{supplyQ.data ? `${formatEther(supplyQ.data as bigint)} ${symbolQ.data ?? ''}` : '…'}</span>
+              </div>
+              <div>
+                <span className="text-zinc-400">Contract Address:</span>{" "}
+                <span className="font-mono text-emerald-400">
+                  {BondingCurveToken}
+                </span>
+              </div>
+              <div>
+                <span className="text-zinc-400">Decimals:</span>{" "}
+                <span className="font-medium text-white">{decimalsQ.data as string ?? '…'}</span>
+              </div>
+            </div>
+          </div>
+          {/* Chain & Wallet Information */}
+          <div className="rounded-xl border border-zinc-700 bg-[#111415] p-6 text-sm mt-4">
+            <h2 className="mb-4 text-lg font-semibold text-white">Chain & Wallet</h2>
+            <div className="space-y-2">
+
+              <div>
+                <span className="text-zinc-400">Chain ID:</span>{" "}
+                <span className="font-medium text-white">{chainId}</span>
+              </div>
+              <div>
+                <span className="text-zinc-400">Connected: </span>{" "}
+                <span className="font-medium text-white">{isConnected ? 'yes' : 'no'}</span>
+              </div>
+              <div>
+                <span className="text-zinc-400">Your balance:: </span>{" "}
+                <span className="font-medium text-white">{myBalQ.data ? `${formatEther(myBalQ.data as bigint)} ${symbolQ.data ?? ''}` : (isConnected ? '0' : '—')}</span>
+              </div>
+            </div>
+          </div>
+          {status && <div style={{ marginTop: 12 }}><b>Status:</b> {status}</div>}
+          {txHash && (
+            <div style={{ marginTop: 4 }}>
+              <b>Tx:</b> <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" rel="noreferrer">{txHash}</a>
+            </div>
+          )}
+        </div>
       </div>
+
     </>
   )
 }
+
+
 
 export default App
